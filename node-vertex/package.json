@@ -1,0 +1,20 @@
+{
+  "name": "@nightwardhq/example-node-vertex",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Runnable Nightward + Google Vertex AI example (Node). Source of truth for the Vertex wrap snippet; smoke-tested offline in CI.",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --import tsx --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@nightwardhq/sdk": "latest",
+    "@google/genai": "^0.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

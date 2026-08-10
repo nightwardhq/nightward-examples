@@ -1,0 +1,20 @@
+{
+  "name": "@nightwardhq/example-node-openai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Runnable Nightward + OpenAI example (Node). The source of truth for the OpenAI/onboarding/quickstart snippets — its marked regions are extracted into @nightwardhq/snippets, and it is smoke-tested offline in CI, so the docs snippets cannot drift from the SDK.",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --import tsx --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@nightwardhq/sdk": "latest",
+    "openai": "^4.67.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

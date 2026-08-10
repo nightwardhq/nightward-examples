@@ -1,0 +1,20 @@
+{
+  "name": "@nightwardhq/example-node-bedrock",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Runnable Nightward + Amazon Bedrock example (Node). Source of truth for the Bedrock wrap snippet; smoke-tested offline in CI.",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --import tsx --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@nightwardhq/sdk": "latest",
+    "@aws-sdk/client-bedrock-runtime": "^3.700.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
