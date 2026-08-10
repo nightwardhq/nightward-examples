@@ -1,8 +1,8 @@
-"""Runnable Nightward + Anthropic example (Python).
+"""Instrument the Anthropic SDK with Nightward (Python).
 
-Same transport seam as OpenAI — ``nw.httpx_client()`` drops into the client — proving the wrap generalises.
-The marked region is the source for the Anthropic Python wrap snippet; ``tests/test_smoke.py`` runs it
-offline via ``httpx.MockTransport``, and mypy type-checks it against the real SDK (so a rename fails CI).
+Same idea as OpenAI: attach at the HTTP layer with ``nw.httpx_client()`` so Nightward sees each request's
+usage, and name the caller with ``with nw.actor(...)``. Create nw once at startup:
+    nw = Nightward(api_key=os.environ["NIGHTWARD_API_KEY"])
 """
 
 from __future__ import annotations
@@ -18,9 +18,7 @@ class _User(Protocol):
 
 
 def call_anthropic(nw: Nightward, user: _User, model: str, messages: list[Any]) -> None:
-    """Instrument an Anthropic call and attribute it to a user (anthropic.python.wrap)."""
-    # >>> snippet: anthropic.python.wrap
+    """Instrument an Anthropic call and attribute it to a user."""
     client = Anthropic(http_client=nw.httpx_client())
     with nw.actor(id=user.id):
         client.messages.create(model=model, max_tokens=1024, messages=messages)
-    # <<< snippet: anthropic.python.wrap

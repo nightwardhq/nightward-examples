@@ -3,10 +3,9 @@ import assert from "node:assert/strict";
 import { Nightward } from "@nightwardhq/sdk";
 
 /*
- * Offline smoke test: the middleware from the snippet must establish actor context so a provider call made
- * inside the request is attributed. We drive the middleware handler directly with a mock request + a `next`
- * that stands in for an in-request provider call (report()); if the context isn't set, the event wouldn't
- * be attributed and the seam would be pointless.
+ * Offline check: the middleware sets actor context for the request, so a provider call made inside it is
+ * attributed to the caller. We call the middleware handler directly with a mock request and a `next` that
+ * stands in for an in-request provider call.
  */
 test("express.node.wrap — the middleware scopes actor context for the request", () => {
   const nw = new Nightward({

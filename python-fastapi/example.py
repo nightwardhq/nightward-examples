@@ -1,8 +1,9 @@
-"""Runnable Nightward + FastAPI example (Python).
+"""Instrument a FastAPI app with Nightward (Python).
 
-Set the actor once at the edge of the request via the Starlette/FastAPI middleware; every provider call in
-the request is then attributed to it. The marked region is the source for the FastAPI framework snippet.
-``req.state.user`` is whatever your own auth dependency attached upstream.
+Set the caller once, at the edge of the request, with Nightward middleware. Every provider call made while
+handling that request is then attributed to the caller — you don't repeat ``nw.actor(...)`` in each route.
+``req.state.user`` is whatever your own auth dependency attached upstream. Create nw once at startup:
+    nw = Nightward(api_key=os.environ["NIGHTWARD_API_KEY"])
 """
 
 from __future__ import annotations
@@ -14,9 +15,7 @@ from nightward import Nightward
 
 
 def instrument_fastapi(app: FastAPI, nw: Nightward) -> OpenAI:
-    """Attribute every provider call in a request to the request's actor (fastapi.python.wrap)."""
-    # >>> snippet: fastapi.python.wrap
+    """Set actor context for every request, then use your provider client normally inside the route."""
     app.add_middleware(nw.Middleware, actor=lambda req: {"id": req.state.user.id})
     client = OpenAI(http_client=nw.httpx_client())
-    # <<< snippet: fastapi.python.wrap
     return client

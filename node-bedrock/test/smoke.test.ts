@@ -4,10 +4,9 @@ import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
 import { Nightward } from "@nightwardhq/sdk";
 
 /*
- * Offline seam check: nw.instrument() must be total (never throw), return the same client instance
- * (mutate-in-place), and be idempotent (double-instrument is a no-op). Client construction needs no AWS
- * credentials — those resolve at call time — so this runs fully offline. The actual send() in the snippet
- * is compile-verified against the real @aws-sdk types (that's the anti-drift guarantee for Bedrock).
+ * Offline check: nw.instrument() returns the same client (it wraps in place) and is safe to call more than
+ * once. Constructing a BedrockRuntimeClient needs no AWS credentials — those resolve at call time — so this
+ * runs offline with no real Bedrock call.
  */
 test("bedrock.node.wrap — instrument returns the same client and is idempotent", () => {
   const nw = new Nightward({

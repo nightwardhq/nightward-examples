@@ -4,10 +4,10 @@ import { Nightward } from "@nightwardhq/sdk";
 import { callOpenAI, callOpenAIWithOrg, decide, callAzure, callCompatible } from "../src/index.js";
 
 /*
- * Offline smoke test — proves the snippet actually instruments a call without touching the network:
- *   - `baseFetch` is the mock OpenAI endpoint (what nw.fetch wraps),
- *   - `fetchImpl` is the mock ingest transport (so nothing reaches api.nightward.io).
- * If the wrap stops emitting a telemetry event, this fails and the extracted snippet can't ship.
+ * Test your instrumentation offline — no real OpenAI or Nightward calls needed:
+ *   - `baseFetch` is a mock OpenAI endpoint (the fetch that nw.fetch wraps),
+ *   - `fetchImpl` is a mock Nightward transport, so nothing leaves your machine.
+ * The assertion checks that the wrapped provider call enqueues a Nightward event.
  */
 function mockNightward(): Nightward {
   return new Nightward({

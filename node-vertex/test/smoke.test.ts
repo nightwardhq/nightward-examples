@@ -4,9 +4,9 @@ import { GoogleGenAI } from "@google/genai";
 import { Nightward } from "@nightwardhq/sdk";
 
 /*
- * Offline seam check (mirrors Bedrock): nw.instrument() must be total, return the same client, and be
- * idempotent. Construction needs no Google credentials (auth resolves at call time), so this runs offline.
- * The generateContent() call in the snippet is compile-verified against the real @google/genai types.
+ * Offline check (mirrors Bedrock): nw.instrument() returns the same client and is safe to call more than
+ * once. Constructing the client needs no Google credentials — those resolve at call time — so this runs
+ * offline with no real Vertex call.
  */
 test("vertex.node.wrap — instrument returns the same client and is idempotent", () => {
   const nw = new Nightward({
