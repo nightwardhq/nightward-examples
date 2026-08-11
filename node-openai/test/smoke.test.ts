@@ -33,14 +33,14 @@ function mockNightward(): Nightward {
 test("openai.node.wrap instruments a call offline and enqueues a telemetry event", async () => {
   process.env.OPENAI_API_KEY = "sk-test-not-used";
   const nw = mockNightward();
-  await callOpenAI(nw, { id: "user_123" }, "gpt-4o", [{ role: "user", content: "hi" }]);
+  await callOpenAI(nw, { id: "user_123", plan: "free", emailVerified: true }, "gpt-4o", [{ role: "user", content: "hi" }]);
   assert.ok(nw.queueSize > 0, "the instrumented OpenAI call should enqueue a Nightward event");
 });
 
 test("openai.node.wrapOrg attributes to a user + organisation", async () => {
   process.env.OPENAI_API_KEY = "sk-test-not-used";
   const nw = mockNightward();
-  await callOpenAIWithOrg(nw, { id: "user_123", orgId: "org_42" }, "gpt-4o", [{ role: "user", content: "hi" }]);
+  await callOpenAIWithOrg(nw, { id: "user_123", orgId: "org_42", plan: "pro", emailVerified: true }, "gpt-4o", [{ role: "user", content: "hi" }]);
   assert.ok(nw.queueSize > 0, "the org-attributed call should enqueue a Nightward event");
 });
 

@@ -16,12 +16,13 @@ import OpenAI, { AzureOpenAI } from "openai";
 /** Instrument an OpenAI call and attribute it to a user. */
 export async function callOpenAI(
   nw: Nightward,
-  user: { id: string },
+  user: { id: string; plan: string; emailVerified: boolean },
   model: string,
   messages: OpenAI.Chat.ChatCompletionMessageParam[],
 ): Promise<void> {
   const openai = new OpenAI({ fetch: nw.fetch });
-  await nw.withActor({ id: user.id }, () =>
+  // plan and emailVerified are what keep your paying customers out of the flagged list
+  await nw.withActor({ id: user.id, plan: user.plan, emailVerified: user.emailVerified }, () =>
     openai.chat.completions.create({ model, messages }),
   );
 }
@@ -30,13 +31,14 @@ export async function callOpenAI(
  *  (adding it later means re-keying your data, so it's worth passing from the start). */
 export async function callOpenAIWithOrg(
   nw: Nightward,
-  user: { id: string; orgId: string },
+  user: { id: string; orgId: string; plan: string; emailVerified: boolean },
   model: string,
   messages: OpenAI.Chat.ChatCompletionMessageParam[],
 ): Promise<void> {
   const openai = new OpenAI({ fetch: nw.fetch });
-  await nw.withActor({ id: user.id, orgId: user.orgId }, () =>
-    openai.chat.completions.create({ model, messages }),
+  await nw.withActor(
+    { id: user.id, orgId: user.orgId, plan: user.plan, emailVerified: user.emailVerified },
+    () => openai.chat.completions.create({ model, messages }),
   );
 }
 

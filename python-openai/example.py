@@ -19,24 +19,34 @@ from openai import AzureOpenAI, OpenAI
 
 class _User(Protocol):
     id: str
+    plan: str
+    email_verified: bool
 
 
 class _OrgUser(Protocol):
     id: str
     org_id: str
+    plan: str
+    email_verified: bool
 
 
 def call_openai(nw: Nightward, user: _User, model: str, messages: list[Any]) -> None:
     """Instrument an OpenAI call and attribute it to a user."""
     client = OpenAI(http_client=nw.httpx_client())
-    with nw.actor(id=user.id):
+    # plan and email_verified are what keep your paying customers out of the flagged list
+    with nw.actor(id=user.id, plan=user.plan, email_verified=user.email_verified):
         client.chat.completions.create(model=model, messages=messages)
 
 
 def call_openai_with_org(nw: Nightward, user: _OrgUser, model: str, messages: list[Any]) -> None:
     """Attribute a call to a user AND their organisation — pass org_id if your product has teams/workspaces."""
     client = OpenAI(http_client=nw.httpx_client())
-    with nw.actor(id=user.id, org_id=user.org_id):
+    with nw.actor(
+        id=user.id,
+        org_id=user.org_id,
+        plan=user.plan,
+        email_verified=user.email_verified,
+    ):
         client.chat.completions.create(model=model, messages=messages)
 
 
