@@ -42,6 +42,31 @@ export async function callOpenAIWithOrg(
   );
 }
 
+/** Step 5 — the caller signals. `withActor({ id })` attributes a call; these signals are what let Nightward
+ *  tell your users apart. Pass what you have — each one unlocks a class of detection (disposable-domain
+ *  checks, datacenter/proxy classification, linkage). An integration that carries `id` and nothing else emits
+ *  events that are valid and diagnostically thin. */
+export async function callOpenAIWithSignals(
+  nw: Nightward,
+  user: { id: string; emailDomain: string; emailVerified: boolean; accountCreatedAt: string },
+  req: { ip: string; deviceId: string },
+  model: string,
+  messages: OpenAI.Chat.ChatCompletionMessageParam[],
+): Promise<void> {
+  const openai = new OpenAI({ fetch: nw.fetch });
+  await nw.withActor(
+    {
+      id: user.id,
+      emailDomain: user.emailDomain, // the domain only — Nightward never receives the full address
+      emailVerified: user.emailVerified,
+      accountCreatedAt: user.accountCreatedAt,
+      ip: req.ip, // the caller's IP — datacenter / proxy classification (hashed at ingest, never stored raw)
+      deviceHint: req.deviceId, // a stable device fingerprint, if you have one — drives linkage
+    },
+    () => openai.chat.completions.create({ model, messages }),
+  );
+}
+
 /** Ask Nightward how to handle a request before you call the provider, and act on the recommendation in your
  *  own code. `check()` is synchronous, in-process, and makes no network call — it resolves the actor from
  *  the surrounding `withActor` scope. (Acting on verdicts is a paid feature; on the free plan it records the

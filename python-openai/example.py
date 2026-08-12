@@ -30,6 +30,18 @@ class _OrgUser(Protocol):
     email_verified: bool
 
 
+class _SignalUser(Protocol):
+    id: str
+    email_domain: str
+    email_verified: bool
+    account_created_at: str
+
+
+class _Req(Protocol):
+    ip: str
+    device_id: str
+
+
 def call_openai(nw: Nightward, user: _User, model: str, messages: list[Any]) -> None:
     """Instrument an OpenAI call and attribute it to a user."""
     client = OpenAI(http_client=nw.httpx_client())
@@ -46,6 +58,22 @@ def call_openai_with_org(nw: Nightward, user: _OrgUser, model: str, messages: li
         org_id=user.org_id,
         plan=user.plan,
         email_verified=user.email_verified,
+    ):
+        client.chat.completions.create(model=model, messages=messages)
+
+
+def call_openai_with_signals(nw: Nightward, user: _SignalUser, req: _Req, model: str, messages: list[Any]) -> None:
+    """Step 5 — the caller signals. ``with nw.actor(id=...)`` attributes a call; these signals are what let
+    Nightward tell your users apart. Pass what you have — each unlocks a class of detection (disposable-domain
+    checks, datacenter/proxy classification, linkage)."""
+    client = OpenAI(http_client=nw.httpx_client())
+    with nw.actor(
+        id=user.id,
+        email_domain=user.email_domain,  # the domain only — Nightward never receives the full address
+        email_verified=user.email_verified,
+        account_created_at=user.account_created_at,
+        ip=req.ip,  # the caller's IP — datacenter / proxy classification (hashed at ingest, never stored raw)
+        device_hint=req.device_id,  # a stable device fingerprint, if you have one — drives linkage
     ):
         client.chat.completions.create(model=model, messages=messages)
 
