@@ -3,7 +3,9 @@ name = "nightward-example-python-openai"
 version = "0.0.0"
 description = "Runnable Nightward + OpenAI example (Python)."
 requires-python = ">=3.9"
-dependencies = ["nightward", "openai", "httpx"]
+# openai pinned <2: this example targets the openai 1.x API. openai 3.0.0 changed http_client typing so it no
+# longer unifies with httpx.Client (mypy: duplicate httpx/httpx2) — provider drift, not a Nightward change.
+dependencies = ["nightward", "openai<2", "httpx"]
 
 [project.optional-dependencies]
 dev = ["mypy", "pytest"]
