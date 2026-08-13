@@ -25,6 +25,10 @@ export async function callOpenAI(
   await nw.withActor({ id: user.id, plan: user.plan, emailVerified: user.emailVerified }, () =>
     openai.chat.completions.create({ model, messages }),
   );
+  // The install guide's Step 4 shows the true minimum — a stable actor id, nothing else.
+  await nw.withActor({ id: user.id }, () =>
+    openai.chat.completions.create({ model, messages }),
+  );
 }
 
 /** Attribute a call to a user AND their organisation — pass `orgId` if your product has teams or workspaces

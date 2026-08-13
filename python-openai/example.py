@@ -48,6 +48,9 @@ def call_openai(nw: Nightward, user: _User, model: str, messages: list[Any]) -> 
     # plan and email_verified are what keep your paying customers out of the flagged list
     with nw.actor(id=user.id, plan=user.plan, email_verified=user.email_verified):
         client.chat.completions.create(model=model, messages=messages)
+    # The install guide's Step 4 shows the true minimum — a stable actor id, nothing else.
+    with nw.actor(id=user.id):
+        client.chat.completions.create(model=model, messages=messages)
 
 
 def call_openai_with_org(nw: Nightward, user: _OrgUser, model: str, messages: list[Any]) -> None:
