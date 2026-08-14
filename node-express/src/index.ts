@@ -12,7 +12,14 @@ import { Nightward } from "@nightwardhq/sdk";
 
 declare module "express" {
   interface Request {
-    user: { id: string; plan: string };
+    user: {
+      id: string;
+      plan: string;
+      emailDomain: string;
+      emailVerified: boolean;
+      accountCreatedAt: string;
+    };
+    deviceId: string;
   }
 }
 
@@ -29,6 +36,24 @@ export function mountActorWithPlan(app: Express, nw: Nightward): void {
     nw.middleware((req) => {
       const { user } = req as Request;
       return { id: user.id, plan: user.plan };
+    }),
+  );
+}
+
+/** The full recommended signal set, extracted once in the middleware — the same fields you'd pass to
+ *  `withActor`, set for every request instead of per call. */
+export function mountActorWithSignals(app: Express, nw: Nightward): void {
+  app.use(
+    nw.middleware((req) => {
+      const { user, ip, deviceId } = req as Request;
+      return {
+        id: user.id,
+        emailDomain: user.emailDomain,
+        emailVerified: user.emailVerified,
+        accountCreatedAt: user.accountCreatedAt,
+        ip,
+        deviceHint: deviceId,
+      };
     }),
   );
 }

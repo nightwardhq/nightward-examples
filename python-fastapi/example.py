@@ -19,3 +19,19 @@ def instrument_fastapi(app: FastAPI, nw: Nightward) -> OpenAI:
     app.add_middleware(nw.Middleware, actor=lambda req: {"id": req.state.user.id})
     client = OpenAI(http_client=nw.httpx_client())
     return client
+
+
+def mount_actor_with_signals(app: FastAPI, nw: Nightward) -> None:
+    """The full recommended signal set, extracted once in the middleware — the same fields you'd pass to
+    ``nw.actor(...)``, set for every request instead of per route."""
+    app.add_middleware(
+        nw.Middleware,
+        actor=lambda req: {
+            "id": req.state.user.id,
+            "email_domain": req.state.user.email_domain,
+            "email_verified": req.state.user.email_verified,
+            "account_created_at": req.state.user.account_created_at,
+            "ip": req.client.host,
+            "device_hint": req.headers.get("x-device-id"),
+        },
+    )
