@@ -9,9 +9,15 @@ import OpenAI, { AzureOpenAI } from "openai";
  * how spend gets attributed and abuse gets caught. Nightward sits beside the call, never in front of it: no
  * proxy, no extra network hop, and no prompt content ever leaves your process.
  *
- * Create the client once at startup and reuse it:
- *   const nw = new Nightward({ apiKey: process.env.NIGHTWARD_API_KEY })
+ * Create the client once at startup and reuse it.
  */
+
+/** The Nightward client — create it ONCE at startup and reuse it. It reads its configuration (API key,
+ *  environment, hash salt) from NIGHTWARD_* environment variables, so no arguments are needed. */
+export function makeNightward(): Nightward {
+  const nw = new Nightward();
+  return nw;
+}
 
 /** Instrument an OpenAI call and attribute it to a user. */
 export async function callOpenAI(
@@ -61,11 +67,11 @@ export async function callOpenAIWithSignals(
   await nw.withActor(
     {
       id: user.id,
-      emailDomain: user.emailDomain, // the domain only — Nightward never receives the full address
+      emailDomain: user.emailDomain,
       emailVerified: user.emailVerified,
       accountCreatedAt: user.accountCreatedAt,
-      ip: req.ip, // the caller's IP — datacenter / proxy classification (hashed at ingest, never stored raw)
-      deviceHint: req.deviceId, // a stable device fingerprint, if you have one — drives linkage
+      ip: req.ip,
+      deviceHint: req.deviceId,
     },
     () => openai.chat.completions.create({ model, messages }),
   );

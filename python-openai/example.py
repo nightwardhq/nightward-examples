@@ -5,8 +5,7 @@ You keep your existing OpenAI client and calls. Nightward attaches at the HTTP l
 user the call belongs to — that's how spend gets attributed and abuse gets caught. Nightward sits beside
 the call, never in front of it: no proxy, no extra network hop, and no prompt content leaves your process.
 
-Create the client once at startup and reuse it:
-    nw = Nightward(api_key=os.environ["NIGHTWARD_API_KEY"])
+Create the client once at startup and reuse it.
 """
 
 from __future__ import annotations
@@ -42,6 +41,13 @@ class _Req(Protocol):
     device_id: str
 
 
+def make_nightward() -> Nightward:
+    """The Nightward client — create it ONCE at startup and reuse it. It reads its configuration (API key,
+    environment, hash salt) from NIGHTWARD_* environment variables, so no arguments are needed."""
+    nw = Nightward()
+    return nw
+
+
 def call_openai(nw: Nightward, user: _User, model: str, messages: list[Any]) -> None:
     """Instrument an OpenAI call and attribute it to a user."""
     client = OpenAI(http_client=nw.httpx_client())
@@ -72,11 +78,11 @@ def call_openai_with_signals(nw: Nightward, user: _SignalUser, req: _Req, model:
     client = OpenAI(http_client=nw.httpx_client())
     with nw.actor(
         id=user.id,
-        email_domain=user.email_domain,  # the domain only — Nightward never receives the full address
+        email_domain=user.email_domain,
         email_verified=user.email_verified,
         account_created_at=user.account_created_at,
-        ip=req.ip,  # the caller's IP — datacenter / proxy classification (hashed at ingest, never stored raw)
-        device_hint=req.device_id,  # a stable device fingerprint, if you have one — drives linkage
+        ip=req.ip,
+        device_hint=req.device_id,
     ):
         client.chat.completions.create(model=model, messages=messages)
 
